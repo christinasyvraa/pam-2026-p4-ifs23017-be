@@ -16,7 +16,7 @@ import java.io.File
 import java.util.*
 
 class PlantService(private val plantRepository: IPlantRepository) {
-    // Mengambil semua data Wisata
+    // Mengambil semua data tumbuhan
     suspend fun getAllPlants(call: ApplicationCall) {
         val search = call.request.queryParameters["search"] ?: ""
 
@@ -24,22 +24,22 @@ class PlantService(private val plantRepository: IPlantRepository) {
 
         val response = DataResponse(
             "success",
-            "Berhasil mengambil daftar Wisata",
+            "Berhasil mengambil daftar tumbuhan",
             mapOf(Pair("plants", plants))
         )
         call.respond(response)
     }
 
-    // Mengambil data Wisata berdasarkan id
+    // Mengambil data tumbuhan berdasarkan id
     suspend fun getPlantById(call: ApplicationCall) {
         val id = call.parameters["id"]
-            ?: throw AppException(400, "ID Wisata tidak boleh kosong!")
+            ?: throw AppException(400, "ID tumbuhan tidak boleh kosong!")
 
-        val plant = plantRepository.getPlantById(id) ?: throw AppException(404, "Data Wisata tidak tersedia!")
+        val plant = plantRepository.getPlantById(id) ?: throw AppException(404, "Data tumbuhan tidak tersedia!")
 
         val response = DataResponse(
             "success",
-            "Berhasil mengambil data Wisata",
+            "Berhasil mengambil data tumbuhan",
             mapOf(Pair("plant", plant))
         )
         call.respond(response)
@@ -101,12 +101,12 @@ class PlantService(private val plantRepository: IPlantRepository) {
 
         val file = File(plantReq.pathGambar)
         if (!file.exists()) {
-            throw AppException(400, "Gambar Wisata gagal diupload!")
+            throw AppException(400, "Gambar tumbuhan gagal diupload!")
         }
 
     }
 
-    // Menambahkan data Wisata
+    // Menambahkan data tumbuhan
     suspend fun createPlant(call: ApplicationCall) {
         // Ambil data request
         val plantReq = getPlantRequest(call)
@@ -121,7 +121,7 @@ class PlantService(private val plantRepository: IPlantRepository) {
             if(tmpFile.exists()){
                 tmpFile.delete()
             }
-            throw AppException(409, "Wisata dengan nama ini sudah terdaftar!")
+            throw AppException(409, "Tumbuhan dengan nama ini sudah terdaftar!")
         }
 
         val plantId = plantRepository.addPlant(
@@ -130,18 +130,18 @@ class PlantService(private val plantRepository: IPlantRepository) {
 
         val response = DataResponse(
             "success",
-            "Berhasil menambahkan data Wisata",
+            "Berhasil menambahkan data tumbuhan",
             mapOf(Pair("plantId", plantId))
         )
         call.respond(response)
     }
 
-    // Mengubah data Wisata
+    // Mengubah data tumbuhan
     suspend fun updatePlant(call: ApplicationCall) {
         val id = call.parameters["id"]
-            ?: throw AppException(400, "ID Wisata tidak boleh kosong!")
+            ?: throw AppException(400, "ID tumbuhan tidak boleh kosong!")
 
-        val oldPlant = plantRepository.getPlantById(id) ?: throw AppException(404, "Data Wisata tidak tersedia!")
+        val oldPlant = plantRepository.getPlantById(id) ?: throw AppException(404, "Data tumbuhan tidak tersedia!")
 
         // Ambil data request
         val plantReq = getPlantRequest(call)
@@ -161,7 +161,7 @@ class PlantService(private val plantRepository: IPlantRepository) {
                 if(tmpFile.exists()){
                     tmpFile.delete()
                 }
-                throw AppException(409, "Wisata dengan nama ini sudah terdaftar!")
+                throw AppException(409, "Tumbuhan dengan nama ini sudah terdaftar!")
             }
         }
 
@@ -177,45 +177,45 @@ class PlantService(private val plantRepository: IPlantRepository) {
             id, plantReq.toEntity()
         )
         if (!isUpdated) {
-            throw AppException(400, "Gagal memperbarui data Wisata!")
+            throw AppException(400, "Gagal memperbarui data tumbuhan!")
         }
 
         val response = DataResponse(
             "success",
-            "Berhasil mengubah data Wisata",
+            "Berhasil mengubah data tumbuhan",
             null
         )
         call.respond(response)
     }
 
-    // Menghapus data Wisata
+    // Menghapus data tumbuhan
     suspend fun deletePlant(call: ApplicationCall) {
         val id = call.parameters["id"]
-            ?: throw AppException(400, "ID Wisata tidak boleh kosong!")
+            ?: throw AppException(400, "ID tumbuhan tidak boleh kosong!")
 
-        val oldPlant = plantRepository.getPlantById(id) ?: throw AppException(404, "Data Wisata tidak tersedia!")
+        val oldPlant = plantRepository.getPlantById(id) ?: throw AppException(404, "Data tumbuhan tidak tersedia!")
 
         val oldFile = File(oldPlant.pathGambar)
 
         val isDeleted = plantRepository.removePlant(id)
         if (!isDeleted) {
-            throw AppException(400, "Gagal menghapus data Wisata!")
+            throw AppException(400, "Gagal menghapus data tumbuhan!")
         }
 
-        // Hapus data gambar jika data Wisata sudah dihapus
+        // Hapus data gambar jika data tumbuhan sudah dihapus
         if (oldFile.exists()) {
             oldFile.delete()
         }
 
         val response = DataResponse(
             "success",
-            "Berhasil menghapus data Wisata",
+            "Berhasil menghapus data tumbuhan",
             null
         )
         call.respond(response)
     }
 
-    // Mengambil gambar Wisata
+    // Mengambil gambar tumbuhan
     suspend fun getPlantImage(call: ApplicationCall) {
         val id = call.parameters["id"]
             ?: return call.respond(HttpStatusCode.BadRequest)

@@ -16,7 +16,7 @@ import java.io.File
 import java.util.*
 
 class DestinationService(private val destinationRepository: IDestinationRepository) {
-    // Mengambil semua data tumbuhan
+    // Mengambil semua data Wisata
     suspend fun getAllDestinations(call: ApplicationCall) {
         val search = call.request.queryParameters["search"] ?: ""
 
@@ -24,22 +24,22 @@ class DestinationService(private val destinationRepository: IDestinationReposito
 
         val response = DataResponse(
             "success",
-            "Berhasil mengambil daftar tumbuhan",
+            "Berhasil mengambil daftar Wisata",
             mapOf(Pair("destinations", destinations))
         )
         call.respond(response)
     }
 
-    // Mengambil data tumbuhan berdasarkan id
+    // Mengambil data Wisata berdasarkan id
     suspend fun getDestinationById(call: ApplicationCall) {
         val id = call.parameters["id"]
-            ?: throw AppException(400, "ID tumbuhan tidak boleh kosong!")
+            ?: throw AppException(400, "ID Wisata tidak boleh kosong!")
 
-        val destination = destinationRepository.getDestinationById(id) ?: throw AppException(404, "Data tumbuhan tidak tersedia!")
+        val destination = destinationRepository.getDestinationById(id) ?: throw AppException(404, "Data Wisata tidak tersedia!")
 
         val response = DataResponse(
             "success",
-            "Berhasil mengambil data tumbuhan",
+            "Berhasil mengambil data Wisata",
             mapOf(Pair("destination", destination))
         )
         call.respond(response)
@@ -94,19 +94,19 @@ class DestinationService(private val destinationRepository: IDestinationReposito
         val validatorHelper = ValidatorHelper(destinationReq.toMap())
         validatorHelper.required("nama", "Nama tidak boleh kosong")
         validatorHelper.required("deskripsi", "Deskripsi tidak boleh kosong")
-        validatorHelper.required("manfaat", "Manfaat tidak boleh kosong")
-        validatorHelper.required("efekSamping", "Efek Samping tidak boleh kosong")
+        validatorHelper.required("lokasi", "Lokasi tidak boleh kosong")
+        validatorHelper.required("feedback", "Feedback tidak boleh kosong")
         validatorHelper.required("pathGambar", "Gambar tidak boleh kosong")
         validatorHelper.validate()
 
         val file = File(destinationReq.pathGambar)
         if (!file.exists()) {
-            throw AppException(400, "Gambar tumbuhan gagal diupload!")
+            throw AppException(400, "Gambar Wisata gagal diupload!")
         }
 
     }
 
-    // Menambahkan data tumbuhan
+    // Menambahkan data Wisata
     suspend fun createDestination(call: ApplicationCall) {
         // Ambil data request
         val destinationReq = getDestinationRequest(call)
@@ -121,7 +121,7 @@ class DestinationService(private val destinationRepository: IDestinationReposito
             if(tmpFile.exists()){
                 tmpFile.delete()
             }
-            throw AppException(409, "Tumbuhan dengan nama ini sudah terdaftar!")
+            throw AppException(409, "Wisata dengan nama ini sudah terdaftar!")
         }
 
         val destinationId = destinationRepository.addDestination(
@@ -130,18 +130,18 @@ class DestinationService(private val destinationRepository: IDestinationReposito
 
         val response = DataResponse(
             "success",
-            "Berhasil menambahkan data tumbuhan",
+            "Berhasil menambahkan data Wisata",
             mapOf(Pair("destinationId", destinationId))
         )
         call.respond(response)
     }
 
-    // Mengubah data tumbuhan
+    // Mengubah data Wisata
     suspend fun updateDestination(call: ApplicationCall) {
         val id = call.parameters["id"]
-            ?: throw AppException(400, "ID tumbuhan tidak boleh kosong!")
+            ?: throw AppException(400, "ID Wisata tidak boleh kosong!")
 
-        val oldDestination = destinationRepository.getDestinationById(id) ?: throw AppException(404, "Data tumbuhan tidak tersedia!")
+        val oldDestination = destinationRepository.getDestinationById(id) ?: throw AppException(404, "Data Wisata tidak tersedia!")
 
         // Ambil data request
         val destinationReq = getDestinationRequest(call)
@@ -161,7 +161,7 @@ class DestinationService(private val destinationRepository: IDestinationReposito
                 if(tmpFile.exists()){
                     tmpFile.delete()
                 }
-                throw AppException(409, "Tumbuhan dengan nama ini sudah terdaftar!")
+                throw AppException(409, "Wisata dengan nama ini sudah terdaftar!")
             }
         }
 
@@ -177,45 +177,45 @@ class DestinationService(private val destinationRepository: IDestinationReposito
             id, destinationReq.toEntity()
         )
         if (!isUpdated) {
-            throw AppException(400, "Gagal memperbarui data tumbuhan!")
+            throw AppException(400, "Gagal memperbarui data Wisata!")
         }
 
         val response = DataResponse(
             "success",
-            "Berhasil mengubah data tumbuhan",
+            "Berhasil mengubah data Wisata",
             null
         )
         call.respond(response)
     }
 
-    // Menghapus data tumbuhan
+    // Menghapus data Wisata
     suspend fun deleteDestination(call: ApplicationCall) {
         val id = call.parameters["id"]
-            ?: throw AppException(400, "ID tumbuhan tidak boleh kosong!")
+            ?: throw AppException(400, "ID Wisata tidak boleh kosong!")
 
-        val oldDestination = destinationRepository.getDestinationById(id) ?: throw AppException(404, "Data tumbuhan tidak tersedia!")
+        val oldDestination = destinationRepository.getDestinationById(id) ?: throw AppException(404, "Data Wisata tidak tersedia!")
 
         val oldFile = File(oldDestination.pathGambar)
 
         val isDeleted = destinationRepository.removeDestination(id)
         if (!isDeleted) {
-            throw AppException(400, "Gagal menghapus data tumbuhan!")
+            throw AppException(400, "Gagal menghapus data Wisata!")
         }
 
-        // Hapus data gambar jika data tumbuhan sudah dihapus
+        // Hapus data gambar jika data Wisata sudah dihapus
         if (oldFile.exists()) {
             oldFile.delete()
         }
 
         val response = DataResponse(
             "success",
-            "Berhasil menghapus data tumbuhan",
+            "Berhasil menghapus data Wisata",
             null
         )
         call.respond(response)
     }
 
-    // Mengambil gambar tumbuhan
+    // Mengambil gambar Wisata
     suspend fun getDestinationImage(call: ApplicationCall) {
         val id = call.parameters["id"]
             ?: return call.respond(HttpStatusCode.BadRequest)
